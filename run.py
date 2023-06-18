@@ -9,13 +9,20 @@ def remove_cell_outputs(notebook_path:str) -> None:
     output, error = process.communicate()
     print(output)
     
-def run_notebook(notebook_path:str, overwrite:bool = False) -> None:
+def run_notebook(
+        notebook_path:str, 
+        output_name:str, 
+        overwrite:bool = False
+    ) -> None:
     notebook_path = Path(notebook_path)
     workdir = notebook_path.parent
     if not overwrite:
         output_path = notebook_path.parent / "outputs"
         output_path.mkdir(parents=True, exist_ok=True)
-        output_path = output_path / notebook_path.name
+        if output_name is not None:
+            output_path = output_path / output_name
+        else:
+            output_path = output_path / notebook_path.name
     else:
         output_path = workdir / f".tmp-{notebook_path.name}"
 
