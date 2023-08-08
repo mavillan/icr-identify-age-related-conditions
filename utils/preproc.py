@@ -1,4 +1,5 @@
 # %% [code]
+# %% [code]
 import numpy as np
 import pandas as pd
 from sklearn import impute
@@ -30,14 +31,17 @@ def load_data():
     return train,test,input_cols
 
 
-def scale_data(train, test, input_cols):
+def scale_data(train, test, input_cols, impute_only=False):
     train = train.copy()
     test = test.copy()
     
-    preproc_pipe = pipeline.Pipeline([
+    steps = [
         ("imputer", impute.SimpleImputer(strategy="median")), 
-        ("scaler", preprocessing.MaxAbsScaler()),
-    ])
+    ]
+    if not impute_only:
+        steps.append(("scaler", preprocessing.MaxAbsScaler()))
+    
+    preproc_pipe = pipeline.Pipeline(steps)
     preproc_pipe.fit(train[input_cols])
 
     train[input_cols] = preproc_pipe.transform(train[input_cols])
