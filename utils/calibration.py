@@ -5,6 +5,10 @@ import optuna
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
+#########################################################
+# competition metric
+#########################################################
+
 def balanced_logloss_(y_pred, y_true, eps=1e-7):
     n0 = np.sum(1-y_true)
     n1 = np.sum(y_true)
@@ -14,6 +18,33 @@ def balanced_logloss_(y_pred, y_true, eps=1e-7):
     log_loss1 = - np.sum(y_true * np.log(p1)) / (n1+eps)
     return (log_loss0 + log_loss1)/2
 
+#########################################################
+# magic function
+#########################################################
+
+def exp_func(x):
+    return np.exp(-1/x)
+
+def psi_func(x):
+    out = np.empty(x.size)
+    
+    mask0 = (x <= 0)
+    mask1 = (x >= 1)
+    mask01 = np.logical_and(x>0, x<1)
+    
+    out[mask0] = 0
+    out[mask1] = 1
+    out[mask01] = exp_func(x[mask01]) / (exp_func(x[mask01]) + exp_func(1-x[mask01]))
+    
+    return out
+
+def scale_func(x, alpha, beta, gamma):
+    return (alpha-gamma) * psi_func(beta * x) + gamma
+
+
+#########################################################
+# calibration functions
+#########################################################
 
 def calibrate_probs(
         prob_class1,
